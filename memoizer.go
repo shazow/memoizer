@@ -1,0 +1,100 @@
+package memoizer
+ 
+import (
+	"errors"
+	"fmt"
+	"reflect"
+	"runtime"
+)
+ 
+var ErrMissedCache = errors.New("Memoizer: Missed cache.")
+ 
+type Cacher interface {
+	CreateKey(f interface{}, callArgs []interface{}) string
+	Get(key string, object *interface{}) error
+	Set(key string, object interface{}) error
+}
+ 
+type Memoizer interface {
+	Cacher
+	Call(f interface{}, callArgs ...interface{}) interface{}
+	// TODO: Replace(f interface{}) interface{}
+}
+
+// Implement Cacher
+
+type MemoryCache struct {
+	storage map[string]interface{}
+}
+
+func (m *MemoryCache) CreateKey(f interface{}, callArgs []interface{}) string {
+	fName := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
+	// TODO: Hash function name + args?
+	return fName + ":" + fmt.Sprint(callArgs)
+}
+
+func (m *MemoryCache) Get(key string, object *interface{}) error {
+	r, ok := m.storage[key]
+	*object = r
+	if !ok {
+		return ErrMissedCache
+	}
+	return nil
+}
+ 
+func (m *MemoryCache) Set(key string, object interface{}) error {
+	m.storage[key] = object
+	return nil
+}
+
+func NewMemoryCache() *MemoryCache {
+	c := MemoryCache{}
+	c.storage = make(map[string]interface{})
+	return &c
+}
+
+// Implement Memoizer
+
+type Memoize struct {
+	cache Cacher
+}
+
+// Call function using memoize technique with storage method defined by m.cache.
+//
+// Function can return up to one arbitrary value and one error. If error is not
+// nil, caching is skipped and error is returned with the value.
+// TODO: Is it possible to support arbitrary numbers of return values?
+//
+// See source for text/template/funcs.go for a similar call example.
+func (m *Memoize) Call(f interface{}, callArgs ...interface{}) (interface{}, error) {
+	key := m.cache.CreateKey(f, callArgs)
+
+	var r interface{}
+	err := m.cache.Get(key, &r)
+	if err == nil {
+		return r, nil
+	}
+ 
+	reflectArgs := make([]reflect.Value, len(callArgs))
+	for i, arg := range callArgs {
+		reflectArgs[i] = reflect.ValueOf(arg)
+	}
+	
+	result := reflect.ValueOf(f).Call(reflectArgs)
+	if len(result) == 0 {
+		// No return value.
+		return nil, nil
+	}
+	r = result[0].Interface()
+
+	if len(result) == 2 {
+		// Has error return value, check it before saving to cache.
+		err = result[1].Interface().(error)
+		if err != nil {
+			return r, err
+		}
+	}
+
+	m.cache.Set(key, r)
+	return r, nil
+}
