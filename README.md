@@ -32,10 +32,8 @@ Pull requests with other caching mechanisms are welcome!
 
 * Add a `Memoizer.Replace(...)` function which returns an equivalent memoized
   function.
-
 * Figure out if there's a way to support functions with arbitrary number of
   return values.
-
 * Implement more example caching mechanisms. Memcache, redis, etc.
 
 
