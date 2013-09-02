@@ -21,20 +21,25 @@ type Memoizer interface {
 	// TODO: Replace(f interface{}) interface{}
 }
 
-// Implement Cacher
+// Cacher base struct
 
-type MemoryCache struct {
-	storage map[string]interface{}
-}
+type BaseCache struct {}
 
-func (m *MemoryCache) CreateKey(f interface{}, callArgs []interface{}) string {
+func (c *BaseCache) CreateKey(f interface{}, callArgs []interface{}) string {
 	fName := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
 	// TODO: Hash function name + args?
 	return fName + ":" + fmt.Sprint(callArgs)
 }
 
-func (m *MemoryCache) Get(key string, object *interface{}) error {
-	r, ok := m.storage[key]
+// Cacher example implementation
+
+type MemoryCache struct {
+	*BaseCache
+	storage map[string]interface{}
+}
+
+func (c *MemoryCache) Get(key string, object *interface{}) error {
+	r, ok := c.storage[key]
 	*object = r
 	if !ok {
 		return ErrMissedCache
@@ -42,8 +47,8 @@ func (m *MemoryCache) Get(key string, object *interface{}) error {
 	return nil
 }
  
-func (m *MemoryCache) Set(key string, object interface{}) error {
-	m.storage[key] = object
+func (c *MemoryCache) Set(key string, object interface{}) error {
+	c.storage[key] = object
 	return nil
 }
 
