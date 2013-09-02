@@ -94,9 +94,9 @@ func (m *Memoize) Call(f interface{}, callArgs ...interface{}) (interface{}, err
 
 	if len(result) == 2 {
 		// Has error return value, check it before saving to cache.
-		err = result[1].Interface().(error)
-		if err != nil {
-			return r, err
+		resultErr := result[1].Interface()
+		if resultErr != nil {
+			return r, resultErr.(error)
 		}
 	}
 
