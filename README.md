@@ -5,6 +5,9 @@ Golang memoizer interface for caching your function calls.
 This is a generic implementation which supports providing your own caching
 mechanism.
 
+**Status:** Use with skepticism. I'm not convinced the interface and reflection bits are ideal here—suggestions appreciated.
+
+
 ## Usage
 
 Memoizer comes with a simple example caching implementation, called `MemoryCache`.
