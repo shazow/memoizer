@@ -61,7 +61,7 @@ func NewMemoryCache() *MemoryCache {
 // Implement Memoizer
 
 type Memoize struct {
-	cache Cacher
+	Cache Cacher
 }
 
 // Call function using memoize technique with storage method defined by m.cache.
@@ -72,10 +72,10 @@ type Memoize struct {
 //
 // See source for text/template/funcs.go for a similar call example.
 func (m *Memoize) Call(f interface{}, callArgs ...interface{}) (interface{}, error) {
-	key := m.cache.CreateKey(f, callArgs)
+	key := m.Cache.CreateKey(f, callArgs)
 
 	var r interface{}
-	err := m.cache.Get(key, &r)
+	err := m.Cache.Get(key, &r)
 	if err == nil {
 		return r, nil
 	}
@@ -100,6 +100,6 @@ func (m *Memoize) Call(f interface{}, callArgs ...interface{}) (interface{}, err
 		}
 	}
 
-	m.cache.Set(key, r)
+	m.Cache.Set(key, r)
 	return r, nil
 }
