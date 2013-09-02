@@ -1,20 +1,20 @@
 package memoizer
- 
+
 import (
 	"errors"
 	"fmt"
 	"reflect"
 	"runtime"
 )
- 
+
 var ErrMissedCache = errors.New("Memoizer: Missed cache.")
- 
+
 type Cacher interface {
 	CreateKey(f interface{}, callArgs []interface{}) string
 	Get(key string, object *interface{}) error
 	Set(key string, object interface{}) error
 }
- 
+
 type Memoizer interface {
 	Cacher
 	Call(f interface{}, callArgs ...interface{}) interface{}
@@ -23,7 +23,7 @@ type Memoizer interface {
 
 // Cacher base struct
 
-type BaseCache struct {}
+type BaseCache struct{}
 
 func (c *BaseCache) CreateKey(f interface{}, callArgs []interface{}) string {
 	fName := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
@@ -46,7 +46,7 @@ func (c *MemoryCache) Get(key string, object *interface{}) error {
 	}
 	return nil
 }
- 
+
 func (c *MemoryCache) Set(key string, object interface{}) error {
 	c.storage[key] = object
 	return nil
@@ -79,12 +79,12 @@ func (m *Memoize) Call(f interface{}, callArgs ...interface{}) (interface{}, err
 	if err == nil {
 		return r, nil
 	}
- 
+
 	reflectArgs := make([]reflect.Value, len(callArgs))
 	for i, arg := range callArgs {
 		reflectArgs[i] = reflect.ValueOf(arg)
 	}
-	
+
 	result := reflect.ValueOf(f).Call(reflectArgs)
 	if len(result) == 0 {
 		// No return value.
