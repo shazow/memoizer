@@ -2,11 +2,9 @@
 
 Golang memoizer interface for caching your function calls.
 
-This is a generic implementation which supports providing your own caching
-mechanism.
+**Status: Don't use this!** Seems there is a consensus that this is not how you do things in Go. But I'd like to keep the code up for reference and funsies.
 
-**Status:** Use with skepticism. I'm not convinced the interface and reflection bits are ideal here—suggestions appreciated.
-
+Avoid using this module unless you know what you're doing.
 
 ## Usage
 
